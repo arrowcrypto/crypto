@@ -21,7 +21,7 @@
 //
 // Deprecated: due to its weakened security, new systems should not rely on this
 // elliptic curve. This package is frozen, and not implemented in constant time.
-// There is a more complete implementation at github.com/cloudflare/bn256, but
+// There is a more complete implementation at github.com/ /bn256, but
 // note that it suffers from the same security issues of the underlying curve.
 package bn256 // import "golang.org/x/crypto/bn256"
 
@@ -53,6 +53,13 @@ func RandomG1(r io.Reader) (*big.Int, *G1, error) {
 	}
 
 	return k, new(G1).ScalarBaseMult(k), nil
+}
+
+// HashG1 hashes a message onto the G1 curve
+func HashToG1Point(m []byte) *G1 {
+	e := new(G1)
+	e.p = hashToCurvePoint(m)
+	return e
 }
 
 func (e *G1) String() string {

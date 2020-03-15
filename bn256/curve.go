@@ -5,6 +5,7 @@
 package bn256
 
 import (
+	"crypto/sha256"
 	"math/big"
 )
 
@@ -31,6 +32,32 @@ func newCurvePoint(pool *bnPool) *curvePoint {
 		pool.Get(),
 		pool.Get(),
 		pool.Get(),
+	}
+}
+
+// hashToCurvePoint hashes a message onto a curve point. The algorithm is base
+// on the try-and-increment approach. First the message is hashed to 256bits,
+// and the hash value is treated as the x coordinate.  A check is performed to
+// see if there is a y such that (x,y) is on the curve.  Increment the x value
+// by 1 until this condition is met.
+// NOTE: The approach is prone to timing attacks.
+func hashToCurvePoint(msg []byte) *curvePoint {
+	one := new(big.Int).SetInt64(1)
+
+	h := sha256.Sum256(msg)
+	x := new(big.Int).SetBytes(h[:])
+	x.Mod(x, p)
+
+	for {
+		// compute x^3 + 3
+		xxx := new(big.Int).Mul(x, x)
+		xxx.Mul(xxx, x)
+		xxx.Add(xxx, curveB)
+
+		if y := new(big.Int).ModSqrt(xxx, p); y != nil {
+			return &curvePoint{x, y, one, one}
+		}
+		x.Add(x, one)
 	}
 }
 

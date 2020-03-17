@@ -108,6 +108,10 @@ func (e *G1) Neg(a *G1) *G1 {
 	return e
 }
 
+func (e *GT) Eql(a *GT) bool {
+	return e.p.Eql(a.p)
+}
+
 // Marshal converts n to a byte slice.
 func (e *G1) Marshal() []byte {
 	// Each value is a 256-bit number.

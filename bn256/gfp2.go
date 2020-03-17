@@ -39,6 +39,15 @@ func (e *gfP2) Set(a *gfP2) *gfP2 {
 	return e
 }
 
+func (e *gfP2) Eql(a *gfP2) bool {
+	e.x.Mod(e.x, p)
+	e.y.Mod(e.y, p)
+	a.x.Mod(a.x, p)
+	a.y.Mod(a.y, p)
+
+	return e.x.Cmp(a.x) == 0 && e.y.Cmp(a.y) == 0
+}
+
 func (e *gfP2) SetZero() *gfP2 {
 	e.x.SetInt64(0)
 	e.y.SetInt64(0)

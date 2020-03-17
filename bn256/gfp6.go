@@ -39,6 +39,10 @@ func (e *gfP6) Set(a *gfP6) *gfP6 {
 	return e
 }
 
+func (e *gfP6) Eql(a *gfP6) bool {
+	return e.x.Eql(a.x) && e.y.Eql(a.y) && e.z.Eql(a.z)
+}
+
 func (e *gfP6) SetZero() *gfP6 {
 	e.x.SetZero()
 	e.y.SetZero()

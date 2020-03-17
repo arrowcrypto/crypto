@@ -37,6 +37,10 @@ func (e *gfP12) Set(a *gfP12) *gfP12 {
 	return e
 }
 
+func (e *gfP12) Eql(a *gfP12) bool {
+	return e.x.Eql(a.x) && e.y.Eql(a.y)
+}
+
 func (e *gfP12) SetZero() *gfP12 {
 	e.x.SetZero()
 	e.y.SetZero()

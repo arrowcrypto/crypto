@@ -43,6 +43,7 @@ func newCurvePoint(pool *bnPool) *curvePoint {
 // NOTE: The approach is prone to timing attacks.
 func hashToCurvePoint(msg []byte) *curvePoint {
 	one := new(big.Int).SetInt64(1)
+	t := new(big.Int).SetInt64(1)
 
 	h := sha256.Sum256(msg)
 	x := new(big.Int).SetBytes(h[:])
@@ -55,7 +56,7 @@ func hashToCurvePoint(msg []byte) *curvePoint {
 		xxx.Add(xxx, curveB)
 
 		if y := new(big.Int).ModSqrt(xxx, p); y != nil {
-			return &curvePoint{x, y, one, one}
+			return &curvePoint{x, y, one, t}
 		}
 		x.Add(x, one)
 	}

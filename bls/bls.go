@@ -4,7 +4,12 @@ import (
 	"crypto/rand"
 	"math/big"
 
-	"golang.org/x/crypto/bn256"
+	"github.com/arrowcrypto/crypto/bn256"
+)
+
+var (
+	one   = new(big.Int).SetInt64(1)
+	g2gen = new(bn256.G2).ScalarBaseMult(big.NewInt(1))
 )
 
 // PublicKey is the BLS public key, i.e. a point on curve G2
@@ -41,7 +46,48 @@ func GenerateKeyPair() (*PrivateKey, error) {
 
 func Sign(privKey *PrivateKey, msg []byte) *Signature {
 
-	sigma := bn256.HashToG1Point(msg)
-	sigma = sigma.ScalarMult(sigma, privKey.x)
+	hash := bn256.HashToG1Point(msg)
+	sigma := hash.ScalarMult(hash, privKey.x)
 	return &Signature{sigma: sigma}
+}
+
+func Verify(pubKey *PublicKey, msg []byte, sig *Signature) bool {
+	//  check e(sigma, g2) =? e(H(m), pk )
+	h := bn256.HashToG1Point(msg)
+
+	rhs := bn256.Pair(h, pubKey.gx)
+	lhs := bn256.Pair(sig.sigma, g2gen)
+
+	return rhs.Eql(lhs)
+}
+
+// AggregateSignatures combines signatures
+func AggregateSignatures(sigs ...*Signature) *Signature {
+
+	var aggregrated *Signature
+	for i, sig := range sigs {
+		if i == 0 {
+			aggregrated = &Signature{
+				sigma: new(bn256.G1).ScalarMult(sig.sigma, one),
+			}
+		} else {
+			aggregrated.sigma.Add(aggregrated.sigma, sig.sigma)
+		}
+	}
+	return aggregrated
+}
+
+// AggregatePublicKeys combines public keys
+func AggregatePublicKeys(pubKeys ...*PublicKey) *PublicKey {
+	var aggregrated PublicKey
+	for i, pubKey := range pubKeys {
+		if i == 0 {
+			aggregrated = PublicKey{
+				gx: new(bn256.G2).ScalarMult(pubKey.gx, one),
+			}
+		} else {
+			aggregrated.gx.Add(aggregrated.gx, pubKey.gx)
+		}
+	}
+	return &aggregrated
 }

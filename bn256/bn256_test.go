@@ -297,6 +297,39 @@ func TestTripartiteDiffieHellman(t *testing.T) {
 	}
 }
 
+func TestHashToG1Point(t *testing.T) {
+
+	msg := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+	g1 := HashToG1Point(msg)
+	if g1 == nil {
+		t.Error("g1 is nil")
+	}
+
+	form := g1.Marshal()
+	_, ok := new(G1).Unmarshal(form)
+	if !ok {
+		t.Fatalf("failed to unmarshal")
+	}
+
+	g1.ScalarBaseMult(Order)
+	form = g1.Marshal()
+	g2, ok := new(G1).Unmarshal(form)
+	if !ok {
+		t.Fatalf("failed to unmarshal ∞")
+	}
+	if !g2.p.IsInfinity() {
+		t.Fatalf("∞ unmarshaled incorrectly")
+	}
+
+	one := new(G1).ScalarBaseMult(new(big.Int).SetInt64(1))
+	g1.Add(g1, one)
+	g1.p.MakeAffine(nil)
+	if g1.p.x.Cmp(one.p.x) != 0 || g1.p.y.Cmp(one.p.y) != 0 {
+		t.Errorf("1+0 != 1 in G1")
+	}
+}
+
 func BenchmarkPairing(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Pair(&G1{curveGen}, &G2{twistGen})

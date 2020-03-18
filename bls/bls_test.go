@@ -35,7 +35,6 @@ func TestBasicFunctions(t *testing.T) {
 func TestAggregatedSignatures(t *testing.T) {
 	req := require.New(t)
 
-	//privateKeys := make([]*PrivateKey, 0)
 	pubKeys := make([]*PublicKey, 0)
 	sigs := make([]*Signature, 0)
 	msg := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
@@ -45,7 +44,6 @@ func TestAggregatedSignatures(t *testing.T) {
 		newPrivateKey, err := GenerateKeyPair()
 		req.NoError(err)
 		req.NotNil(newPrivateKey)
-		//privateKeys = append(privateKeys, newPrivateKey)
 		pubKeys = append(pubKeys, newPrivateKey.GetPublicKey())
 
 		sig := Sign(newPrivateKey, msg)
